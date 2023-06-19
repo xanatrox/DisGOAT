@@ -1,5 +1,6 @@
 const Discord = require('discord.js');
 const fs = require('fs');
+const { EmbedBuilder } = require('discord.js');
 const { Client, GatewayIntentBits,GuildMember, MessageManager, Guild } = require('discord.js');
 const client = new Client({ 
     intents: [
@@ -24,7 +25,12 @@ client.on('ready', () => {
 client.on('messageDelete', (message) => {
   const logsChannel = client.channels.cache.get(logsChannelId);
   if (logsChannel) {
-    logsChannel.send(`[Message Deleted] ${message.author}: ${message.content}`);
+    const embed= new EmbedBuilder()
+      .setColor("Red")
+      .setTimestamp()
+      .addFields({name:"Author", value: `${message.author}`})
+    logsChannel.send({embeds: [embed]});
+    //`[Message Deleted] ${message.author}: ${message.content}`
   }
 });
 
@@ -85,4 +91,4 @@ client.on('message', (message) => {
   });
 
 // Bot connexion
-client.login('');
+client.login('MTExNTk5Mjk3MzQyODEzODAzNA.GTV-QD.6TzFGxJI2sX8FMAZ5TouRbjuyQduauVQswAOTs');
