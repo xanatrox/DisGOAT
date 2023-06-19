@@ -85,4 +85,4 @@ client.on('message', (message) => {
   });
 
 // Bot connexion
-client.login('MTExNTk5Mjk3MzQyODEzODAzNA.GMPrhw.G9WZ3vJTlmSYpa3GOuyDevovbZTbq1yfyEj5Z0');
+client.login('');
