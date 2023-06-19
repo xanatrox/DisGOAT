@@ -91,4 +91,4 @@ client.on('message', (message) => {
   });
 
 // Bot connexion
-client.login('MTExNTk5Mjk3MzQyODEzODAzNA.GTV-QD.6TzFGxJI2sX8FMAZ5TouRbjuyQduauVQswAOTs');
+client.login('');
