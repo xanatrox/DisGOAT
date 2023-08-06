@@ -13,7 +13,7 @@ const client = new Client({
 
 
 // Logs channel ID
-const logsChannelId = '1116013592383336580';
+const logsChannelId = '1137785534215897281';
 
 
 // Event Ready (let know if bot is running)
@@ -28,9 +28,15 @@ client.on('messageDelete', (message) => {
     const embed= new EmbedBuilder()
       .setColor("Red")
       .setTimestamp()
-      .addFields({name:"Author", value: `${message.author}`})
+      .setAuthor({name: message.author.username, iconURL: message.author.avatarURL()})
+      .setThumbnail(message.author.avatarURL())
+      .addFields(
+        {name: "*Message sent by : *" , value: `${message.author} *deleted in* ${message.channel}`, inline: true},
+        {name : " ", value: `${message.content}`},
+      )      
+      .setFooter({text: `Message ID: ${message.id}`});
+
     logsChannel.send({embeds: [embed]});
-    //`[Message Deleted] ${message.author}: ${message.content}`
   }
 });
 
