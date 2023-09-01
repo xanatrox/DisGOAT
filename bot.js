@@ -44,6 +44,12 @@ client.on('messageDelete', (message) => {
 // Event messageUpdate 
 client.on('messageUpdate', (oldMessage, newMessage) => {
   const logsChannel = client.channels.cache.get(logsChannelId);
+
+  if (newMessage.content.includes("discord.gg/") || newMessage.content.includes('discordapp.com/invite/')) {
+    newMessage.delete()
+    newMessage.channel.send("**:warning: Link deleted :warning:**\n **Invite links are not permitted on this server**")
+  }
+  
   if (logsChannel) {
     const embed= new EmbedBuilder()
       .setColor("Blue")
@@ -102,16 +108,39 @@ client.on('guildMemberUpdate', (oldMember, newMember) => {
 
 
 // Event checkDiscordInvite then remove and warn users 
-client.on('message',(message) => {
+client.on('messageCreate',(message) => {
 
   const logsChannel = client.channels.cache.get(logsChannelId);
   if (message.content.includes("discord.gg/") || message.content.includes('discordapp.com/invite/')) {
     message.delete()
-    message.channel.send("Link deleted \n **Invite links are not permitted on this server**")
+    message.channel.send("**:warning: Link deleted :warning:**\n **Invite links are not permitted on this server**")
+
+    if (logsChannel) {
+      const embed= new EmbedBuilder()
+        .setColor("Blue")
+        .setTimestamp()
+        .setAuthor({name: message.author.username, iconURL: message.author.avatarURL()})
+        .setThumbnail(message.author.avatarURL())
+        .addFields(
+          {name: "*Fordidden link by : *" , value: `${message.author} *sent in* ${message.channel}`, inline: true},
+          {name : " ", value: `${message.content}`},
+        )      
+        .setFooter({text: `Message ID: ${message.id}`});
+  
+      logsChannel.send({embeds: [embed]});
+    
   }
+}
+});
+
+// Event message
+client.on('message', (message) => {
+  // Ignore bot messages
+  if (message.author.bot) return;
+
 });
 
 
 
 // Bot connexion
-client.login('');
+client.login('MTExNTk5Mjk3MzQyODEzODAzNA.GMZ-uc.YmLRzDVSUFjZC5hY59715PkRqiAStYNj0kPJL4');
