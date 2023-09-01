@@ -143,4 +143,4 @@ client.on('message', (message) => {
 
 
 // Bot connexion
-client.login('MTExNTk5Mjk3MzQyODEzODAzNA.GMZ-uc.YmLRzDVSUFjZC5hY59715PkRqiAStYNj0kPJL4');
+client.login('');
