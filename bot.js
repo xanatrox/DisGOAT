@@ -40,13 +40,26 @@ client.on('messageDelete', (message) => {
   }
 });
 
+
 // Event messageUpdate 
 client.on('messageUpdate', (oldMessage, newMessage) => {
   const logsChannel = client.channels.cache.get(logsChannelId);
   if (logsChannel) {
-    logsChannel.send(`[Message Updated] ${oldMessage.author.tag}: ${oldMessage.content} => ${newMessage.content}`);
+    const embed= new EmbedBuilder()
+      .setColor("Blue")
+      .setTimestamp()
+      .setAuthor({name: oldMessage.author.username, iconURL: oldMessage.author.avatarURL()})
+      .setThumbnail(oldMessage.author.avatarURL())
+      .addFields(
+        {name: "*Message modified by : *" , value: `${oldMessage.author} *modified in* ${oldMessage.channel}`, inline: true},
+        {name : " ", value: `${oldMessage.content} --> ${newMessage.content} `},
+      )      
+      .setFooter({text: `Message ID: ${oldMessage.id}`});
+
+    logsChannel.send({embeds: [embed]});
   }
 });
+
 
 // Event guildMemberAdd 
 client.on('guildMemberAdd', (member) => {
@@ -56,6 +69,8 @@ client.on('guildMemberAdd', (member) => {
   }
 });
 
+
+
 // Event guildMemberRemove
 client.on('guildMemberRemove', (member) => {
   const logsChannel = client.channels.cache.get(logsChannelId);
@@ -63,6 +78,7 @@ client.on('guildMemberRemove', (member) => {
     logsChannel.send(`[Member Left] ${member.user}`);
   }
 });
+
 
 // Event guildMemberUpdate (added or deleted role)
 client.on('guildMemberUpdate', (oldMember, newMember) => {
@@ -84,17 +100,18 @@ client.on('guildMemberUpdate', (oldMember, newMember) => {
   
 });
 
-// Event message
-client.on('message', (message) => {
-    // Ignore bot messages
-    if (message.author.bot) return;
-  
-    // Saves logs in a txt file
-    const log = `[${message.guild.name}] ${message.author}: ${message.content}\n`;
-    fs.appendFile('logs.txt', log, (err) => {
-      if (err) console.error(err);
-    });
-  });
+
+// Event checkDiscordInvite then remove and warn users 
+client.on('message',(message) => {
+
+  const logsChannel = client.channels.cache.get(logsChannelId);
+  if (message.content.includes("discord.gg/") || message.content.includes('discordapp.com/invite/')) {
+    message.delete()
+    message.channel.send("Link deleted \n **Invite links are not permitted on this server**")
+  }
+});
+
+
 
 // Bot connexion
 client.login('');
