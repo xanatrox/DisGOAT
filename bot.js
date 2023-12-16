@@ -111,7 +111,7 @@ client.on('guildMemberUpdate', (oldMember, newMember) => {
 client.on('messageCreate',(message) => {
 
   const logsChannel = client.channels.cache.get(logsChannelId);
-  if (message.content.includes("discord.gg/") || message.content.includes('discordapp.com/invite/')) {
+  if (message.content.includes("discord.gg") || message.content.includes('discordapp.com/invite/')) {
     message.delete()
     message.channel.send("**:warning: Link deleted :warning:**\n **Invite links are not permitted on this server**")
 
