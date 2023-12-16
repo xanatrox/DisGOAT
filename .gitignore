@@ -1,0 +1,10 @@
+# Dossiers
+node_modules/
+dist/
+tmp/
+logs/
+
+# Fichiers
+.env
+*.log
+*.pid
