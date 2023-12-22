@@ -106,4 +106,4 @@ client.on('messageCreate', (message) => {
   }
 });
 
-client.login('MTExNTk5Mjk3MzQyODEzODAzNA.GvwO99.ZQfezU4g7wFvxbyPCAM1m4XLF7myET_24BxLiU'); 
+client.login(''); 
