@@ -1,13 +1,11 @@
 const Discord = require('discord.js');
-const fs = require('fs');
-const { EmbedBuilder } = require('discord.js');
-const { Client, GatewayIntentBits,GuildMember, MessageManager, Guild } = require('discord.js');
+const { EmbedBuilder, Client, GatewayIntentBits } = require('discord.js');
 const client = new Client({ 
     intents: [
-      Discord.GatewayIntentBits.Guilds, // Accès aux informations des serveurs
-      Discord.GatewayIntentBits.GuildMembers, // Accès aux informations des membres du serveur
-      Discord.GatewayIntentBits.GuildMessages, // Accès aux messages du serveur
-      Discord.GatewayIntentBits.MessageContent, // Accès aux messages du serveur
+      GatewayIntentBits.Guilds, //Accès aux informations des serveurs
+      GatewayIntentBits.GuildMembers, //Accès aux messages du serveur
+      GatewayIntentBits.GuildMessages,// Accès aux messages du serveur
+      GatewayIntentBits.MessageContent,// Accès au contenu des messages du serveur
     ],
 });
 
@@ -15,78 +13,67 @@ const client = new Client({
 // Logs channel ID
 const logsChannelId = '1137785534215897281';
 
+// Function to create embed
+function createEmbedForGuildMember(author, description, color, footerText, thumbnailUrl) {
+  return new EmbedBuilder()
+    .setColor(color)
+    .setTimestamp()
+    .setAuthor({ name: author.username, iconURL: author.avatarURL() })
+    .setThumbnail(thumbnailUrl)
+    .addFields({ name: " ", value: description })
+    .setFooter({ text: footerText });
+}
 
 // Event Ready (let know if bot is running)
 client.on('ready', () => {
   console.log(`Logged in as ${client.user.tag}!`);
 });
 
-// Event messageDelete 
+// Event message is deleted
 client.on('messageDelete', (message) => {
   const logsChannel = client.channels.cache.get(logsChannelId);
   if (logsChannel) {
-    const embed= new EmbedBuilder()
-      .setColor("Red")
-      .setTimestamp()
-      .setAuthor({name: message.author.username, iconURL: message.author.avatarURL()})
-      .setThumbnail(message.author.avatarURL())
-      .addFields(
-        {name: "*Message sent by : *" , value: `${message.author} *deleted in* ${message.channel}`, inline: true},
-        {name : " ", value: `${message.content}`},
-      )      
-      .setFooter({text: `Message ID: ${message.id}`});
-
-    logsChannel.send({embeds: [embed]});
+    const embed = createEmbed(message.author, `${message.author} *deleted in* ${message.channel}`, "Red", `Message ID: ${message.id}`);
+    logsChannel.send({ embeds: [embed] }).catch(console.error);
   }
 });
 
-
-// Event messageUpdate 
+// Event when message is updated
 client.on('messageUpdate', (oldMessage, newMessage) => {
   const logsChannel = client.channels.cache.get(logsChannelId);
-
+  
   if (newMessage.content.includes("discord.gg/") || newMessage.content.includes('discordapp.com/invite/')) {
-    newMessage.delete()
+    newMessage.delete().catch(console.error);
     newMessage.channel.send("**:warning: Link deleted :warning:**\n **Invite links are not permitted on this server**")
   }
-  
-  if (logsChannel) {
-    const embed= new EmbedBuilder()
-      .setColor("Blue")
-      .setTimestamp()
-      .setAuthor({name: oldMessage.author.username, iconURL: oldMessage.author.avatarURL()})
-      .setThumbnail(oldMessage.author.avatarURL())
-      .addFields(
-        {name: "*Message modified by : *" , value: `${oldMessage.author} *modified in* ${oldMessage.channel}`, inline: true},
-        {name : " ", value: `${oldMessage.content} --> ${newMessage.content} `},
-      )      
-      .setFooter({text: `Message ID: ${oldMessage.id}`});
 
-    logsChannel.send({embeds: [embed]});
+  if (logsChannel) {
+    const embed = createEmbed(oldMessage.author, `${oldMessage.author} *modified in* ${oldMessage.channel}\n${oldMessage.content} --> ${newMessage.content}`, "Blue", `Message ID: ${oldMessage.id}`);
+    logsChannel.send({ embeds: [embed] }).catch(console.error);
   }
 });
 
-
-// Event guildMemberAdd 
+// Event when member joins server
 client.on('guildMemberAdd', (member) => {
   const logsChannel = client.channels.cache.get(logsChannelId);
   if (logsChannel) {
-    logsChannel.send(`[Member Joined] ${member.user}`);
+    const joinDescription = `**Member:** ${member.user.tag}\n**Joined at:** ${member.joinedAt.toDateString()}\n**Member ID:** ${member.id}`;
+    const joinEmbed = createEmbedForGuildMember(member.user, joinDescription, "Green", `Member Joined`, member.user.avatarURL());
+    logsChannel.send({ embeds: [joinEmbed] }).catch(console.error);
   }
 });
 
-
-
-// Event guildMemberRemove
+// Event when member leaves server
 client.on('guildMemberRemove', (member) => {
   const logsChannel = client.channels.cache.get(logsChannelId);
   if (logsChannel) {
-    logsChannel.send(`[Member Left] ${member.user}`);
+    const leaveDescription = `**Member:** ${member.user.tag}\n**Left at:** ${new Date().toDateString()}\n**Member ID:** ${member.id}`;
+    const leaveEmbed = createEmbedForGuildMember(member.user, leaveDescription, "Red", `Member Left`, member.user.avatarURL());
+    logsChannel.send({ embeds: [leaveEmbed] }).catch(console.error);
   }
 });
 
-
-// Event guildMemberUpdate (added or deleted role)
+// Event when member is updated (added or deleted role)
 client.on('guildMemberUpdate', (oldMember, newMember) => {
   const addedRoles = newMember.roles.cache.filter(role => !oldMember.roles.cache.has(role.id));
   const removedRoles = oldMember.roles.cache.filter(role => !newMember.roles.cache.has(role.id));
@@ -94,53 +81,29 @@ client.on('guildMemberUpdate', (oldMember, newMember) => {
 
   addedRoles.forEach(role => {
     if (logsChannel) {
-      logsChannel.send(`[Role Added] ${newMember.user}: ${role.name}`);
+      logsChannel.send(`[Role Added] ${newMember.user}: ${role.name}`).catch(console.error);
     }
   });
 
   removedRoles.forEach(role => {
     if (logsChannel) {
-      logsChannel.send(`[Role Removed] ${newMember.user}: ${role.name}`);
+      logsChannel.send(`[Role Removed] ${newMember.user}: ${role.name}`).catch(console.error);
     }
   });
-  
 });
 
-
 // Event checkDiscordInvite then remove and warn users 
-client.on('messageCreate',(message) => {
-
+client.on('messageCreate', (message) => {
   const logsChannel = client.channels.cache.get(logsChannelId);
   if (message.content.includes("discord.gg") || message.content.includes('discordapp.com/invite/')) {
-    message.delete()
+    message.delete().catch(console.error);
     message.channel.send("**:warning: Link deleted :warning:**\n **Invite links are not permitted on this server**")
 
     if (logsChannel) {
-      const embed= new EmbedBuilder()
-        .setColor("Blue")
-        .setTimestamp()
-        .setAuthor({name: message.author.username, iconURL: message.author.avatarURL()})
-        .setThumbnail(message.author.avatarURL())
-        .addFields(
-          {name: "*Fordidden link by : *" , value: `${message.author} *sent in* ${message.channel}`, inline: true},
-          {name : " ", value: `${message.content}`},
-        )      
-        .setFooter({text: `Message ID: ${message.id}`});
-  
-      logsChannel.send({embeds: [embed]});
-    
+      const embed = createEmbed(message.author, `${message.author} *sent in* ${message.channel}\n${message.content}`, "Blue", `Message ID: ${message.id}`);
+      logsChannel.send({ embeds: [embed] }).catch(console.error);
+    }
   }
-}
 });
 
-// Event message
-client.on('message', (message) => {
-  // Ignore bot messages
-  if (message.author.bot) return;
-
-});
-
-
-
-// Bot connexion
-client.login('');
+client.login('MTExNTk5Mjk3MzQyODEzODAzNA.GvwO99.ZQfezU4g7wFvxbyPCAM1m4XLF7myET_24BxLiU'); 
